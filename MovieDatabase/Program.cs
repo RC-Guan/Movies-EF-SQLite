@@ -1,11 +1,14 @@
+// Program.cs
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MovieDatabase.Infrastructure;
-using MovieDatabase.Models;
+using MovieDatabase.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
+
+// Connect to DBContext
 builder.Services.AddDbContext<MoviesDbContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DbConnectionString"));
@@ -17,9 +20,12 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "MovieDatabase API",
         Description = "Record the movies you love",
-        Version = "v1" 
+        Version = "v1"
     });
 });
+
+// Register IMovieService
+builder.Services.AddScoped<IMovieService, MovieService>();
 
 var app = builder.Build();
 
@@ -32,41 +38,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapGet("/movies", async (MoviesDbContext db) => await db.Movies.ToListAsync());
-
-app.MapGet("/movies/{id}", async (MoviesDbContext db, int id) => await db.Movies.FindAsync(id));
-
-app.MapPost("/movie", async (MoviesDbContext db, Movie movie) =>
-{
-    await db.Movies.AddAsync(movie);
-    await db.SaveChangesAsync();
-    return Results.Created($"/movie/{movie.Id}", movie);
-});
-
-app.MapPut("/movie/{id}", async (MoviesDbContext db, Movie updateMovie, int id) =>
-{
-    var movie = await db.Movies.FindAsync(id);
-    if (movie is null) return Results.NotFound();
-    movie.Name = updateMovie.Name;
-    movie.Description = updateMovie.Description;
-    movie.ReleaseDate = updateMovie.ReleaseDate;
-    movie.Genre = updateMovie.Genre;
-    
-    await db.SaveChangesAsync();
-    return Results.NoContent();
-});
-
-app.MapDelete("/movie/{id}", async (MoviesDbContext db, int id) =>
-{
-    var movie = await db.Movies.FindAsync(id);
-    if (movie is null)
-    {
-        return Results.NotFound();
-    }
-
-    db.Movies.Remove(movie);
-    await db.SaveChangesAsync();
-    return Results.Ok();
-});
+Query.GetMovies(app);
+Query.GetMovieById(app);
+Command.CreateMovie(app);
+Command.UpdateMovie(app);
+Command.DeleteMovie(app);
 
 app.Run();

@@ -3,11 +3,10 @@ using MovieDatabase.Models;
 
 namespace MovieDatabase.Infrastructure;
 
-public class MovieDb : DbContext
+public class MoviesDbContext : DbContext
 {
-    public MovieDb(DbContextOptions options) : base(options)
+    public MoviesDbContext(DbContextOptions options) : base(options)
     {
     }
-
-    public DbSet<Movie> Movies { get; set; } = null!;
+    public DbSet<Movie> Movies { get; set; } 
 }
