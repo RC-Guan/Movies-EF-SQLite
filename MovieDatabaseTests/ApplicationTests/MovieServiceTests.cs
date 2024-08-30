@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using MovieDatabase.Application;
 using MovieDatabase.Infrastructure;
 using MovieDatabase.Models;
-using Xunit;
-using Xunit.Sdk;
 
 namespace MovieDatabase.Tests.ApplicationTests;
 
@@ -12,6 +10,27 @@ public class MovieServiceTests : IDisposable
 {
     private readonly MovieService _movieService;
     private readonly MoviesDbContext _mockMoviesDbContext;
+
+    private readonly Movie _movieValid = new Movie
+    {
+        Name = "Movie 1",
+        Description = "Description 1",
+        Genre = "Action",
+        ReleaseDate = new DateTime(2022, 1, 1)
+    };
+
+    private readonly Movie _movieValid2 = new Movie()
+    {
+        Name = "Movie 2",
+        Description = "Description 2",
+        Genre = "Comedy",
+        ReleaseDate = new DateTime(2023, 1, 1)
+    };
+
+    private readonly Movie _movieInvalidName = new Movie
+    {
+        Name = "", Description = "New Description", Genre = "Drama", ReleaseDate = new DateTime(2023, 1, 1)
+    };
 
     public MovieServiceTests()
     {
@@ -22,33 +41,54 @@ public class MovieServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GetMovieAsync_ShouldReturnMovie()
+    {
+        await _movieService.CreateMovieAsync(_movieValid);
+        await _movieService.CreateMovieAsync(_movieValid2);
+        var result = await _movieService.GetMoviesAsync();
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+        Assert.Equal("Movie 1", result[0].Name);
+        Assert.Equal("Description 1", result[0].Description);
+        Assert.Equal("Action", result[0].Genre);
+        Assert.Equal(new DateTime(2022, 1, 1), result[0].ReleaseDate);
+        Assert.Equal("Movie 2", result[1].Name);
+        Assert.Equal("Description 2", result[1].Description);
+        Assert.Equal("Comedy", result[1].Genre);
+        Assert.Equal(new DateTime(2023, 1, 1), result[1].ReleaseDate);
+    }
+
+    [Fact]
+    public async Task GetMovieByIdAsync_ShouldReturnMovie()
+    {
+        await _movieService.CreateMovieAsync(_movieValid);
+        var result = await _movieService.GetMovieByIdAsync(_movieValid.Id);
+        Assert.NotNull(result);
+        Assert.Equal("Movie 1", result.Name);
+        Assert.Equal("Description 1", result.Description);
+        Assert.Equal("Action", result.Genre);
+        Assert.Equal(new DateTime(2022, 1, 1), result.ReleaseDate);
+    }
+
+[Fact]
     public async Task CreateMovieAsync_ShouldAddMovie()
     {
-        var movie = new Movie
-        {
-            Name = "New Movie",
-            Description = "New Description",
-            Genre = "Drama",
-            ReleaseDate = new DateTime(2023, 1, 1)
-        };
-
-        var result = await _movieService.CreateMovieAsync(movie);
+        var result = await _movieService.CreateMovieAsync(_movieValid);
 
         Assert.NotNull(result);
-        Assert.Equal("New Movie", result.Name);
+        Assert.Equal("Movie 1", result.Name);
+        Assert.Equal("Description 1", result.Description);
+        Assert.Equal("Action", result.Genre);
+        Assert.Equal(new DateTime(2022, 1, 1), result.ReleaseDate);
         Assert.Equal(1, _mockMoviesDbContext.Movies.Count());
     }
 
     [Fact]
     public async Task CreateMovieAsync_ShouldFail_WhenMovieNameIsEmpty()
     {
-        var movie = new Movie
-        {
-            Name = "", Description = "New Description", Genre = "Drama", ReleaseDate = new DateTime(2023, 1, 1)
-        };
-
         var exception =
-            await Assert.ThrowsAsync<ValidationException>(async () => await _movieService.CreateMovieAsync(movie));
+            await Assert.ThrowsAsync<ValidationException>(async () =>
+                await _movieService.CreateMovieAsync(_movieInvalidName));
         Assert.Equal("Name is required", exception.Message);
     }
 
@@ -96,29 +136,15 @@ public class MovieServiceTests : IDisposable
     [Fact]
     public async Task UpdateMovieAsync_ShouldUpdateMovie()
     {
-        var movie = new Movie
-        {
-            Name = "Old Movie",
-            Description = "Old Description",
-            Genre = "Action",
-            ReleaseDate = new DateTime(2022, 1, 1)
-        };
-        await _mockMoviesDbContext.Movies.AddAsync(movie);
+        await _mockMoviesDbContext.Movies.AddAsync(_movieValid);
         await _mockMoviesDbContext.SaveChangesAsync();
 
-        var updateMovie = new Movie
-        {
-            Name = "Updated Movie",
-            Description = "Updated Description",
-            Genre = "Comedy",
-            ReleaseDate = new DateTime(2023, 1, 1)
-        };
-        await _movieService.UpdateMovieAsync(movie.Id, updateMovie);
+        await _movieService.UpdateMovieAsync(_movieValid.Id, _movieValid2);
 
-        var updatedMovie = await _mockMoviesDbContext.Movies.FindAsync(movie.Id);
+        var updatedMovie = await _mockMoviesDbContext.Movies.FindAsync(_movieValid.Id);
         Assert.NotNull(updatedMovie);
-        Assert.Equal("Updated Movie", updatedMovie.Name);
-        Assert.Equal("Updated Description", updatedMovie.Description);
+        Assert.Equal("Movie 2", updatedMovie.Name);
+        Assert.Equal("Description 2", updatedMovie.Description);
         Assert.Equal("Comedy", updatedMovie.Genre);
         Assert.Equal(new DateTime(2023, 1, 1), updatedMovie.ReleaseDate);
     }
@@ -126,63 +152,33 @@ public class MovieServiceTests : IDisposable
     [Fact]
     public async Task UpdateMovieAsync_ShouldFail_WhenMovieNotFound()
     {
-        var updateMovie = new Movie
-        {
-            Name = "Updated Movie",
-            Description = "Updated Description",
-            Genre = "Comedy",
-            ReleaseDate = new DateTime(2023, 1, 1)
-        };
-
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await _movieService.UpdateMovieAsync(1, updateMovie));
+            await _movieService.UpdateMovieAsync(1, _movieValid));
         Assert.Equal("Movie not found", exception.Message);
     }
 
     [Fact]
     public async Task UpdateMovieAsync_ShouldFail_WhenMovieNameIsInvalid()
     {
-        var movie = new Movie
-        {
-            Name = "New Movie",
-            Description = "Description",
-            Genre = "Comedy",
-            ReleaseDate = new DateTime(2000, 1, 1)
-        };
-
-        await _mockMoviesDbContext.Movies.AddAsync(movie);
+        await _mockMoviesDbContext.Movies.AddAsync(_movieValid);
         await _mockMoviesDbContext.SaveChangesAsync();
 
-        var updateMovie = new Movie
-        {
-            Name = "",
-            Description = "Description",
-            Genre = "Comedy",
-            ReleaseDate = new DateTime(2000, 1, 1)
-        };
 
         var exception = await Assert.ThrowsAsync<ValidationException>(async () => await _movieService.UpdateMovieAsync(
-            movie.Id,
-            updateMovie));
+            _movieValid.Id,
+            _movieInvalidName));
         Assert.Equal("Name is required", exception.Message);
     }
 
     [Fact]
     public async Task DeleteMovieAsync_ShouldRemoveMovie()
     {
-        var movie = new Movie
-        {
-            Name = "Movie to Delete",
-            Description = "Description",
-            Genre = "Horror",
-            ReleaseDate = new DateTime(2022, 1, 1)
-        };
-        await _mockMoviesDbContext.Movies.AddAsync(movie);
+        await _mockMoviesDbContext.Movies.AddAsync(_movieValid);
         await _mockMoviesDbContext.SaveChangesAsync();
 
-        await _movieService.DeleteMovieAsync(movie.Id);
+        await _movieService.DeleteMovieAsync(_movieValid.Id);
 
-        var deletedMovie = await _mockMoviesDbContext.Movies.FindAsync(movie.Id);
+        var deletedMovie = await _mockMoviesDbContext.Movies.FindAsync(_movieValid.Id);
         Assert.Null(deletedMovie);
     }
 

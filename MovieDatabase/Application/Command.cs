@@ -1,5 +1,4 @@
 using MovieDatabase.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace MovieDatabase.Application;
 
@@ -7,7 +6,7 @@ public static class Command
 {
     public static void CreateMovie(WebApplication webApplication)
     {
-        webApplication.MapPost("/movie", async ([FromServices] IMovieService movieService, Movie movie) =>
+        webApplication.MapPost("/movie", async (IMovieService movieService, Movie movie) =>
         {
             var createdMovie = await movieService.CreateMovieAsync(movie);
             return Results.Created($"/movie/{createdMovie.Id}", createdMovie);
@@ -17,7 +16,7 @@ public static class Command
     public static void UpdateMovie(WebApplication webApplication)
     {
         webApplication.MapPut("/movie/{id}",
-            async ([FromServices] IMovieService movieService, Movie updateMovie, int id) =>
+            async (IMovieService movieService, Movie updateMovie, int id) =>
             {
                 try
                 {
@@ -33,7 +32,7 @@ public static class Command
 
     public static void DeleteMovie(WebApplication webApplication)
     {
-        webApplication.MapDelete("/movie/{id}", async ([FromServices] IMovieService movieService, int id) =>
+        webApplication.MapDelete("/movie/{id}", async ( IMovieService movieService, int id) =>
         {
             try
             {
