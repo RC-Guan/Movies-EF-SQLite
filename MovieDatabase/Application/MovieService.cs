@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using MovieDatabase.Infrastructure;
 using MovieDatabase.Models;
@@ -5,14 +6,14 @@ using MovieDatabase.Models;
 namespace MovieDatabase.Application;
 
 public class MovieService : IMovieService
-{   
+{
     private readonly MoviesDbContext _moviesDbContext;
-    
+
     public MovieService(MoviesDbContext moviesDbContext)
     {
         _moviesDbContext = moviesDbContext;
     }
-    
+
     public async Task<List<Movie>> GetMoviesAsync()
     {
         return await _moviesDbContext.Movies.ToListAsync();
@@ -25,7 +26,10 @@ public class MovieService : IMovieService
 
     public async Task<Movie> CreateMovieAsync(Movie movie)
     {
-        await _moviesDbContext.Movies.AddAsync(movie);
+        var validationContext = new ValidationContext(movie);
+        Validator.ValidateObject(movie, validationContext, validateAllProperties: true);
+
+        _moviesDbContext.Movies.Add(movie);
         await _moviesDbContext.SaveChangesAsync();
         return movie;
     }
@@ -35,6 +39,9 @@ public class MovieService : IMovieService
         var movie = await _moviesDbContext.Movies.FindAsync(id);
         if (movie is null) throw new KeyNotFoundException("Movie not found");
 
+        var validationContext = new ValidationContext(updateMovie);
+        Validator.ValidateObject(updateMovie, validationContext, validateAllProperties: true);
+        
         movie.Name = updateMovie.Name;
         movie.Description = updateMovie.Description;
         movie.ReleaseDate = updateMovie.ReleaseDate;
@@ -42,7 +49,7 @@ public class MovieService : IMovieService
 
         await _moviesDbContext.SaveChangesAsync();
     }
-    
+
     public async Task DeleteMovieAsync(int id)
     {
         var movie = await _moviesDbContext.Movies.FindAsync(id);

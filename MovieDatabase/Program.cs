@@ -1,4 +1,5 @@
 // Program.cs
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using MovieDatabase.Infrastructure;
@@ -32,10 +33,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "MovieDatabase API V1");
-    });
+    app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "MovieDatabase API V1"); });
 }
 
 Query.GetMovies(app);

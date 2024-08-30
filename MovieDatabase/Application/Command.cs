@@ -16,18 +16,19 @@ public static class Command
 
     public static void UpdateMovie(WebApplication webApplication)
     {
-        webApplication.MapPut("/movie/{id}", async ([FromServices] IMovieService movieService, Movie updateMovie, int id) =>
-        {
-            try
+        webApplication.MapPut("/movie/{id}",
+            async ([FromServices] IMovieService movieService, Movie updateMovie, int id) =>
             {
-                await movieService.UpdateMovieAsync(id, updateMovie);
-                return Results.NoContent();
-            }
-            catch (KeyNotFoundException)
-            {
-                return Results.NotFound();
-            }
-        });
+                try
+                {
+                    await movieService.UpdateMovieAsync(id, updateMovie);
+                    return Results.NoContent();
+                }
+                catch (KeyNotFoundException)
+                {
+                    return Results.NotFound();
+                }
+            });
     }
 
     public static void DeleteMovie(WebApplication webApplication)

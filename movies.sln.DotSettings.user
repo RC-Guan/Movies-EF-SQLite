@@ -1,0 +1,13 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=1e0a39fb_002D0e62_002D44d8_002D9dd6_002D9f454524883a/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="GetMoviesAsync_ShouldReturnMovies" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::3E0F45EB-CF96-4140-A636-A870FFF73415::net7.0::MovieDatabase.Tests.ApplicationTests.MovieServiceTests.CreateMovieAsync_ShouldFail_WhenMovieGenreIsInvalid&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::3E0F45EB-CF96-4140-A636-A870FFF73415::net7.0::MovieDatabase.Tests.ApplicationTests.MovieServiceTests.UpdateMovieAsync_ShouldUpdateMovie&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::3E0F45EB-CF96-4140-A636-A870FFF73415::net7.0::MovieDatabase.Tests.ApplicationTests.MovieServiceTests.UpdateMovieAsync_ShouldFail_WhenMovieNotFound&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::3E0F45EB-CF96-4140-A636-A870FFF73415::net7.0::MovieDatabase.Tests.ApplicationTests.MovieServiceTests.UpdateMovieAsync_ShouldFail_WhenMovieNameIsInvalid&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::3E0F45EB-CF96-4140-A636-A870FFF73415::net7.0::MovieDatabase.Tests.ApplicationTests.MovieServiceTests.DeleteMovieAsync_ShouldFail_WhenMovieNotFound&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::3E0F45EB-CF96-4140-A636-A870FFF73415::net7.0::MovieDatabase.Tests.ApplicationTests.MovieServiceTests.CreateMovieAsync_ShouldFail_WhenMovieDateIsInvalid&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::3E0F45EB-CF96-4140-A636-A870FFF73415::net7.0::MovieDatabase.Tests.ApplicationTests.MovieServiceTests.CreateMovieAsync_ShouldFail_WhenMovieNameIsInvalid&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::3E0F45EB-CF96-4140-A636-A870FFF73415::net7.0::MovieDatabase.Tests.ApplicationTests.MovieServiceTests.CreateMovieAsync_ShouldFail_WhenMovieNameIsTooLong&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
