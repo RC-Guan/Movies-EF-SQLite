@@ -27,7 +27,7 @@ public class MovieService : IMovieService
     public async Task<Movie> CreateMovieAsync(Movie movie)
     {
         var validationContext = new ValidationContext(movie);
-        Validator.ValidateObject(movie, validationContext, validateAllProperties: true);
+        Validator.ValidateObject(movie, validationContext, true);
 
         _moviesDbContext.Movies.Add(movie);
         await _moviesDbContext.SaveChangesAsync();
@@ -40,8 +40,8 @@ public class MovieService : IMovieService
         if (movie is null) throw new KeyNotFoundException("Movie not found");
 
         var validationContext = new ValidationContext(updateMovie);
-        Validator.ValidateObject(updateMovie, validationContext, validateAllProperties: true);
-        
+        Validator.ValidateObject(updateMovie, validationContext, true);
+
         movie.Name = updateMovie.Name;
         movie.Description = updateMovie.Description;
         movie.ReleaseDate = updateMovie.ReleaseDate;

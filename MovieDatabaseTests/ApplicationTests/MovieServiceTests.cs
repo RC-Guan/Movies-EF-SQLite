@@ -8,10 +8,16 @@ namespace MovieDatabase.Tests.ApplicationTests;
 
 public class MovieServiceTests : IDisposable
 {
-    private readonly MovieService _movieService;
     private readonly MoviesDbContext _mockMoviesDbContext;
 
-    private readonly Movie _movieValid = new Movie
+    private readonly Movie _movieInvalidName = new()
+    {
+        Name = "", Description = "New Description", Genre = "Drama", ReleaseDate = new DateTime(2023, 1, 1)
+    };
+
+    private readonly MovieService _movieService;
+
+    private readonly Movie _movieValid = new()
     {
         Name = "Movie 1",
         Description = "Description 1",
@@ -19,7 +25,7 @@ public class MovieServiceTests : IDisposable
         ReleaseDate = new DateTime(2022, 1, 1)
     };
 
-    private readonly Movie _movieValid2 = new Movie()
+    private readonly Movie _movieValid2 = new()
     {
         Name = "Movie 2",
         Description = "Description 2",
@@ -27,17 +33,19 @@ public class MovieServiceTests : IDisposable
         ReleaseDate = new DateTime(2023, 1, 1)
     };
 
-    private readonly Movie _movieInvalidName = new Movie
-    {
-        Name = "", Description = "New Description", Genre = "Drama", ReleaseDate = new DateTime(2023, 1, 1)
-    };
-
     public MovieServiceTests()
     {
-        var options = new DbContextOptionsBuilder<MoviesDbContext>().UseInMemoryDatabase(databaseName: "TestDatabase")
+        var options = new DbContextOptionsBuilder<MoviesDbContext>().UseInMemoryDatabase("TestDatabase")
             .Options;
         _mockMoviesDbContext = new MoviesDbContext(options);
         _movieService = new MovieService(_mockMoviesDbContext);
+    }
+
+    public void Dispose()
+    {
+        _mockMoviesDbContext.Database.EnsureDeleted();
+        _mockMoviesDbContext.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     [Fact]
@@ -70,7 +78,7 @@ public class MovieServiceTests : IDisposable
         Assert.Equal(new DateTime(2022, 1, 1), result.ReleaseDate);
     }
 
-[Fact]
+    [Fact]
     public async Task CreateMovieAsync_ShouldAddMovie()
     {
         var result = await _movieService.CreateMovieAsync(_movieValid);
@@ -188,11 +196,5 @@ public class MovieServiceTests : IDisposable
         var exception =
             await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _movieService.DeleteMovieAsync(1));
         Assert.Equal("Movie not found", exception.Message);
-    }
-
-    public void Dispose()
-    {
-        _mockMoviesDbContext.Database.EnsureDeleted();
-        _mockMoviesDbContext.Dispose();
     }
 }
