@@ -60,16 +60,26 @@ public class Program
 
     private static void GetMovieById(WebApplication webApplication)
     {
-        webApplication.MapGet("/movies/{id:int}",
-            async (IMovieService movieService, int id) => await movieService.GetMovieByIdAsync(id));
+        webApplication.MapGet("/movies/{id:int}", async (int id, IMovieService movieService) =>
+        {
+            var movie = await movieService.GetMovieByIdAsync(id);
+            return movie is not null ? Results.Ok(movie) : Results.NotFound();
+        });
     }
 
     private static void CreateMovie(WebApplication webApplication)
     {
         webApplication.MapPost("/movie", async (IMovieService movieService, Movie movie) =>
         {
-            var createdMovie = await movieService.CreateMovieAsync(movie);
-            return Results.Created($"/movie/{createdMovie.Id}", createdMovie);
+            try
+            {
+                var createdMovie = await movieService.CreateMovieAsync(movie);
+                return Results.Created($"/movie/{createdMovie.Id}", createdMovie);
+            }
+            catch (ArgumentException)
+            {
+                return Results.BadRequest("Incorrect movie data");
+            }
         });
     }
 

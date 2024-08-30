@@ -129,4 +129,82 @@ public class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetMovieById_ShouldReturnNotFound()
+    {
+        // Arrange
+        _movieServiceMock.Setup(service => service.GetMovieByIdAsync(It.IsAny<int>())).ReturnsAsync((Movie)null!);
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services => { services.AddScoped(_ => _movieServiceMock.Object); });
+        }).CreateClient();
+
+        // Act
+        var response = await client.GetAsync("/movies/999");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateMovie_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var invalidMovie = new Movie { Id = 0, Name = "", Genre = "", ReleaseDate = DateTime.MinValue };
+        _movieServiceMock.Setup(service => service.CreateMovieAsync(It.IsAny<Movie>()))
+            .ThrowsAsync(new ArgumentException());
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services => { services.AddScoped(_ => _movieServiceMock.Object); });
+        }).CreateClient();
+
+        // Act
+        var response = await client.PostAsJsonAsync("/movie", invalidMovie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateMovie_ShouldReturnNotFound()
+    {
+        // Arrange
+        var updatedMovie = new Movie
+            { Id = 1, Name = "Updated Movie", Genre = "Action", ReleaseDate = new DateTime(2000, 1, 1) };
+        _movieServiceMock.Setup(service => service.UpdateMovieAsync(It.IsAny<int>(), It.IsAny<Movie>()))
+            .ThrowsAsync(new KeyNotFoundException());
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services => { services.AddScoped(_ => _movieServiceMock.Object); });
+        }).CreateClient();
+
+        // Act
+        var response = await client.PutAsJsonAsync("/movie/999", updatedMovie);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteMovie_ShouldReturnNotFound()
+    {
+        // Arrange
+        _movieServiceMock.Setup(service => service.DeleteMovieAsync(It.IsAny<int>()))
+            .ThrowsAsync(new KeyNotFoundException());
+
+        var client = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services => { services.AddScoped(_ => _movieServiceMock.Object); });
+        }).CreateClient();
+
+        // Act
+        var response = await client.DeleteAsync("/movie/999");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }
