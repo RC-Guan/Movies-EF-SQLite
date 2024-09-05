@@ -28,7 +28,7 @@ public class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
             new() { Id = 1, Name = "Movie 1", Genre = "Action", ReleaseDate = new DateTime(2000, 1, 1) },
             new() { Id = 2, Name = "Movie 2", Genre = "Comedy", ReleaseDate = new DateTime(2010, 1, 1) }
         };
-        _movieServiceMock.Setup(service => service.GetMoviesAsync()).ReturnsAsync(movies);
+        _movieServiceMock.Setup(service => service.GetMovies()).ReturnsAsync(movies);
 
         var client = _factory.WithWebHostBuilder(builder =>
         {
@@ -51,7 +51,7 @@ public class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
     {
         // Arrange
         var movie = new Movie { Id = 1, Name = "Movie 1", Genre = "Action", ReleaseDate = new DateTime(2000, 1, 1) };
-        _movieServiceMock.Setup(service => service.GetMovieByIdAsync(1)).ReturnsAsync(movie);
+        _movieServiceMock.Setup(service => service.GetMovieById(1)).ReturnsAsync(movie);
 
         var client = _factory.WithWebHostBuilder(builder =>
         {
@@ -73,7 +73,7 @@ public class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
     {
         // Arrange
         var newMovie = new Movie { Id = 3, Name = "Movie 3", Genre = "Drama", ReleaseDate = new DateTime(2020, 1, 1) };
-        _movieServiceMock.Setup(service => service.CreateMovieAsync(It.IsAny<Movie>())).ReturnsAsync(newMovie);
+        _movieServiceMock.Setup(service => service.CreateMovie(It.IsAny<Movie>())).ReturnsAsync(newMovie);
 
         var client = _factory.WithWebHostBuilder(builder =>
         {
@@ -96,7 +96,7 @@ public class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
         // Arrange
         var updatedMovie = new Movie
             { Id = 1, Name = "Updated Movie", Genre = "Action", ReleaseDate = new DateTime(2000, 1, 1) };
-        _movieServiceMock.Setup(service => service.UpdateMovieAsync(1, updatedMovie)).Returns(Task.CompletedTask);
+        _movieServiceMock.Setup(service => service.UpdateMovie(1, updatedMovie)).Returns(Task.CompletedTask);
 
         var client = _factory.WithWebHostBuilder(builder =>
         {
@@ -115,7 +115,7 @@ public class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task DeleteMovie_ShouldRemoveMovie()
     {
         // Arrange
-        _movieServiceMock.Setup(service => service.DeleteMovieAsync(1)).Returns(Task.CompletedTask);
+        _movieServiceMock.Setup(service => service.DeleteMovie(1)).Returns(Task.CompletedTask);
 
         var client = _factory.WithWebHostBuilder(builder =>
         {
@@ -134,7 +134,7 @@ public class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task GetMovieById_ShouldReturnNotFound()
     {
         // Arrange
-        _movieServiceMock.Setup(service => service.GetMovieByIdAsync(It.IsAny<int>())).ReturnsAsync((Movie)null!);
+        _movieServiceMock.Setup(service => service.GetMovieById(It.IsAny<int>())).ReturnsAsync((Movie)null!);
 
         var client = _factory.WithWebHostBuilder(builder =>
         {
@@ -153,7 +153,7 @@ public class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
     {
         // Arrange
         var invalidMovie = new Movie { Id = 0, Name = "", Genre = "", ReleaseDate = DateTime.MinValue };
-        _movieServiceMock.Setup(service => service.CreateMovieAsync(It.IsAny<Movie>()))
+        _movieServiceMock.Setup(service => service.CreateMovie(It.IsAny<Movie>()))
             .ThrowsAsync(new ArgumentException());
 
         var client = _factory.WithWebHostBuilder(builder =>
@@ -174,7 +174,7 @@ public class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
         // Arrange
         var updatedMovie = new Movie
             { Id = 1, Name = "Updated Movie", Genre = "Action", ReleaseDate = new DateTime(2000, 1, 1) };
-        _movieServiceMock.Setup(service => service.UpdateMovieAsync(It.IsAny<int>(), It.IsAny<Movie>()))
+        _movieServiceMock.Setup(service => service.UpdateMovie(It.IsAny<int>(), It.IsAny<Movie>()))
             .ThrowsAsync(new KeyNotFoundException());
 
         var client = _factory.WithWebHostBuilder(builder =>
@@ -193,7 +193,7 @@ public class ProgramTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task DeleteMovie_ShouldReturnNotFound()
     {
         // Arrange
-        _movieServiceMock.Setup(service => service.DeleteMovieAsync(It.IsAny<int>()))
+        _movieServiceMock.Setup(service => service.DeleteMovie(It.IsAny<int>()))
             .ThrowsAsync(new KeyNotFoundException());
 
         var client = _factory.WithWebHostBuilder(builder =>

@@ -14,17 +14,17 @@ public class MovieService : IMovieService
         _moviesDbContext = moviesDbContext;
     }
 
-    public async Task<List<Movie>> GetMoviesAsync()
+    public async Task<List<Movie>> GetMovies()
     {
         return await _moviesDbContext.Movies.ToListAsync();
     }
 
-    public async Task<Movie?> GetMovieByIdAsync(int id)
+    public async Task<Movie?> GetMovieById(int id)
     {
         return await _moviesDbContext.Movies.FindAsync(id);
     }
 
-    public async Task<Movie> CreateMovieAsync(Movie movie)
+    public async Task<Movie> CreateMovie(Movie movie)
     {
         var validationContext = new ValidationContext(movie);
         Validator.ValidateObject(movie, validationContext, true);
@@ -34,7 +34,7 @@ public class MovieService : IMovieService
         return movie;
     }
 
-    public async Task UpdateMovieAsync(int id, Movie updateMovie)
+    public async Task UpdateMovie(int id, Movie updateMovie)
     {
         var movie = await _moviesDbContext.Movies.FindAsync(id);
         if (movie is null) throw new KeyNotFoundException("Movie not found");
@@ -50,7 +50,7 @@ public class MovieService : IMovieService
         await _moviesDbContext.SaveChangesAsync();
     }
 
-    public async Task DeleteMovieAsync(int id)
+    public async Task DeleteMovie(int id)
     {
         var movie = await _moviesDbContext.Movies.FindAsync(id);
         if (movie is null) throw new KeyNotFoundException("Movie not found");

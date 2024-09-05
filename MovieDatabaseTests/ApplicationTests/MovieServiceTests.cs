@@ -9,13 +9,12 @@ namespace MovieDatabase.Tests.ApplicationTests;
 public class MovieServiceTests : IDisposable
 {
     private readonly MoviesDbContext _mockMoviesDbContext;
-
+    private readonly MovieService _movieService;
+    
     private readonly Movie _movieInvalidName = new()
     {
         Name = "", Description = "New Description", Genre = "Drama", ReleaseDate = new DateTime(2023, 1, 1)
     };
-
-    private readonly MovieService _movieService;
 
     private readonly Movie _movieValid = new()
     {
@@ -51,9 +50,9 @@ public class MovieServiceTests : IDisposable
     [Fact]
     public async Task GetMovieAsync_ShouldReturnMovie()
     {
-        await _movieService.CreateMovieAsync(_movieValid);
-        await _movieService.CreateMovieAsync(_movieValid2);
-        var result = await _movieService.GetMoviesAsync();
+        await _movieService.CreateMovie(_movieValid);
+        await _movieService.CreateMovie(_movieValid2);
+        var result = await _movieService.GetMovies();
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
         Assert.Equal("Movie 1", result[0].Name);
@@ -69,8 +68,8 @@ public class MovieServiceTests : IDisposable
     [Fact]
     public async Task GetMovieByIdAsync_ShouldReturnMovie()
     {
-        await _movieService.CreateMovieAsync(_movieValid);
-        var result = await _movieService.GetMovieByIdAsync(_movieValid.Id);
+        await _movieService.CreateMovie(_movieValid);
+        var result = await _movieService.GetMovieById(_movieValid.Id);
         Assert.NotNull(result);
         Assert.Equal("Movie 1", result.Name);
         Assert.Equal("Description 1", result.Description);
@@ -81,7 +80,7 @@ public class MovieServiceTests : IDisposable
     [Fact]
     public async Task CreateMovieAsync_ShouldAddMovie()
     {
-        var result = await _movieService.CreateMovieAsync(_movieValid);
+        var result = await _movieService.CreateMovie(_movieValid);
 
         Assert.NotNull(result);
         Assert.Equal("Movie 1", result.Name);
@@ -96,7 +95,7 @@ public class MovieServiceTests : IDisposable
     {
         var exception =
             await Assert.ThrowsAsync<ValidationException>(async () =>
-                await _movieService.CreateMovieAsync(_movieInvalidName));
+                await _movieService.CreateMovie(_movieInvalidName));
         Assert.Equal("Name is required", exception.Message);
     }
 
@@ -110,7 +109,7 @@ public class MovieServiceTests : IDisposable
         };
 
         var exception =
-            await Assert.ThrowsAsync<ValidationException>(async () => await _movieService.CreateMovieAsync(movie));
+            await Assert.ThrowsAsync<ValidationException>(async () => await _movieService.CreateMovie(movie));
         Assert.Equal("Name cannot be longer than 20 characters", exception.Message);
     }
 
@@ -123,7 +122,7 @@ public class MovieServiceTests : IDisposable
         };
 
         var exception =
-            await Assert.ThrowsAsync<ValidationException>(async () => await _movieService.CreateMovieAsync(movie));
+            await Assert.ThrowsAsync<ValidationException>(async () => await _movieService.CreateMovie(movie));
         Assert.Equal("Genre is required", exception.Message);
     }
 
@@ -136,7 +135,7 @@ public class MovieServiceTests : IDisposable
         };
 
         var exception =
-            await Assert.ThrowsAsync<ValidationException>(async () => await _movieService.CreateMovieAsync(movie));
+            await Assert.ThrowsAsync<ValidationException>(async () => await _movieService.CreateMovie(movie));
         Assert.Equal("Release date cannot be earlier than the year 1888.", exception.Message);
     }
 
@@ -147,7 +146,7 @@ public class MovieServiceTests : IDisposable
         await _mockMoviesDbContext.Movies.AddAsync(_movieValid);
         await _mockMoviesDbContext.SaveChangesAsync();
 
-        await _movieService.UpdateMovieAsync(_movieValid.Id, _movieValid2);
+        await _movieService.UpdateMovie(_movieValid.Id, _movieValid2);
 
         var updatedMovie = await _mockMoviesDbContext.Movies.FindAsync(_movieValid.Id);
         Assert.NotNull(updatedMovie);
@@ -161,7 +160,7 @@ public class MovieServiceTests : IDisposable
     public async Task UpdateMovieAsync_ShouldFail_WhenMovieNotFound()
     {
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await _movieService.UpdateMovieAsync(1, _movieValid));
+            await _movieService.UpdateMovie(1, _movieValid));
         Assert.Equal("Movie not found", exception.Message);
     }
 
@@ -172,7 +171,7 @@ public class MovieServiceTests : IDisposable
         await _mockMoviesDbContext.SaveChangesAsync();
 
 
-        var exception = await Assert.ThrowsAsync<ValidationException>(async () => await _movieService.UpdateMovieAsync(
+        var exception = await Assert.ThrowsAsync<ValidationException>(async () => await _movieService.UpdateMovie(
             _movieValid.Id,
             _movieInvalidName));
         Assert.Equal("Name is required", exception.Message);
@@ -184,7 +183,7 @@ public class MovieServiceTests : IDisposable
         await _mockMoviesDbContext.Movies.AddAsync(_movieValid);
         await _mockMoviesDbContext.SaveChangesAsync();
 
-        await _movieService.DeleteMovieAsync(_movieValid.Id);
+        await _movieService.DeleteMovie(_movieValid.Id);
 
         var deletedMovie = await _mockMoviesDbContext.Movies.FindAsync(_movieValid.Id);
         Assert.Null(deletedMovie);
@@ -194,7 +193,7 @@ public class MovieServiceTests : IDisposable
     public async Task DeleteMovieAsync_ShouldFail_WhenMovieNotFound()
     {
         var exception =
-            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _movieService.DeleteMovieAsync(1));
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _movieService.DeleteMovie(1));
         Assert.Equal("Movie not found", exception.Message);
     }
 }

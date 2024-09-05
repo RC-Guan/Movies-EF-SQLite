@@ -55,14 +55,14 @@ public class Program
 
     private static void GetMovies(WebApplication webApplication)
     {
-        webApplication.MapGet("/movies", async (IMovieService movieService) => await movieService.GetMoviesAsync());
+        webApplication.MapGet("/movies", async (IMovieService movieService) => await movieService.GetMovies());
     }
 
     private static void GetMovieById(WebApplication webApplication)
     {
         webApplication.MapGet("/movies/{id:int}", async (int id, IMovieService movieService) =>
         {
-            var movie = await movieService.GetMovieByIdAsync(id);
+            var movie = await movieService.GetMovieById(id);
             return movie is not null ? Results.Ok(movie) : Results.NotFound();
         });
     }
@@ -73,7 +73,7 @@ public class Program
         {
             try
             {
-                var createdMovie = await movieService.CreateMovieAsync(movie);
+                var createdMovie = await movieService.CreateMovie(movie);
                 return Results.Created($"/movie/{createdMovie.Id}", createdMovie);
             }
             catch (ArgumentException)
@@ -90,7 +90,7 @@ public class Program
             {
                 try
                 {
-                    await movieService.UpdateMovieAsync(id, updateMovie);
+                    await movieService.UpdateMovie(id, updateMovie);
                     return Results.NoContent();
                 }
                 catch (KeyNotFoundException)
@@ -106,7 +106,7 @@ public class Program
         {
             try
             {
-                await movieService.DeleteMovieAsync(id);
+                await movieService.DeleteMovie(id);
                 return Results.Ok();
             }
             catch (KeyNotFoundException)
